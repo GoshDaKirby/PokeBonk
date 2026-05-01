@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POKÉBALL SIM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* ── CSS Variables ── */
+    :root {
+      --red:    #e8001a;
+      --red2:   #ff4444;
+      --dark:   #080808;
+      --darker: #030305;
+      --mid:    #12121e;
+      --panel:  #0e0e1a;
+      --border: #2a2a3e;
+      --cream:  #f2ece0;
+      --dim:    #888;
+      --green:  #00ff88;
+      --yellow: #f8d030;
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-mono:  'Share Tech Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--darker);
+      color: var(--cream);
+      font-family: var(--font-mono);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Scanline overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.06) 2px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── Screen System ── */
+    .screen {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .screen.active { display: flex; }
+
+    /* ── Menu Screen ── */
+    #menuScreen {
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(232,0,26,0.15) 0%, transparent 60%),
+        var(--darker);
+    }
+
+    .game-title {
+      font-family: var(--font-pixel);
+      font-size: clamp(14px, 4vw, 28px);
+      color: var(--cream);
+      text-shadow:
+        0 0 20px var(--red),
+        0 0 40px rgba(232,0,26,0.4),
+        4px 4px 0 var(--red);
+      letter-spacing: 4px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .game-subtitle {
+      font-family: var(--font-pixel);
+      font-size: clamp(6px, 1.5vw, 9px);
+      color: var(--red);
+      letter-spacing: 6px;
+      margin-bottom: 48px;
+    }
+
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .btn {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      letter-spacing: 2px;
+      border: 2px solid var(--red);
+      background: transparent;
+      color: var(--cream);
+      padding: 14px 24px;
+      cursor: pointer;
+      position: relative;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+      text-transform: uppercase;
+    }
+    .btn:hover, .btn:focus {
+      background: var(--red);
+      color: var(--dark);
+      box-shadow: 0 0 20px rgba(232,0,26,0.5);
+      outline: none;
+    }
+    .btn.secondary {
+      border-color: var(--border);
+      color: var(--dim);
+      clip-path: none;
+    }
+    .btn.secondary:hover { background: var(--mid); color: var(--cream); border-color: var(--cream); }
+    .btn.small { font-size: 7px; padding: 8px 16px; }
+
+    #rosterDisplay {
+      margin-top: 32px;
+      font-size: 11px;
+      color: var(--dim);
+      text-align: center;
+      min-height: 20px;
+    }
+
+    /* ── Starter Pick ── */
+    #storyPickScreen {
+      background: var(--darker);
+      gap: 16px;
+    }
+    .screen-title {
+      font-family: var(--font-pixel);
+      font-size: clamp(8px, 2vw, 14px);
+      color: var(--red);
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+    .screen-sub {
+      font-size: 11px;
+      color: var(--dim);
+      margin-bottom: 16px;
+    }
+
+    #starterPickArea {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .mon-card {
+      background: var(--panel);
+      border: 2px solid var(--border);
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      min-width: 130px;
+      text-align: center;
+      position: relative;
+    }
+    .mon-card:hover, .mon-card.selected {
+      border-color: var(--red);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(232,0,26,0.3);
+    }
+    .mon-card.locked {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .mon-card.owned { opacity: 1; }
+    .locked-label {
+      position: absolute;
+      top: 8px; right: 8px;
+      font-size: 7px;
+      color: var(--red);
+      font-family: var(--font-pixel);
+    }
+    .mon-sprite { font-size: 32px; margin-bottom: 8px; }
+    .mon-sprite.large { font-size: 48px; }
+    .mon-name {
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      color: var(--cream);
+      margin-bottom: 6px;
+    }
+    .mon-types { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+    .type-badge {
+      font-size: 7px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      color: #fff;
+      font-family: var(--font-pixel);
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+    .mon-stats { font-size: 9px; color: var(--dim); }
+    .stat-table { width: 100%; font-size: 8px; border-collapse: collapse; margin-top: 4px; }
+    .stat-table td { padding: 2px 4px; }
+    .stat-table td:first-child { color: var(--dim); }
+    .stat-table td:last-child { color: var(--cream); text-align: right; }
+
+    .story-pick-actions {
+      display: flex; gap: 12px; margin-top: 8px;
+    }
+
+    /* ── Battle Screen ── */
+    #battleScreen {
+      padding: 0;
+      background: #0a0a0f;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .battle-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: var(--panel);
+      border-bottom: 2px solid var(--red);
+      width: 100%;
+      flex-shrink: 0;
+    }
+    .battle-header .btn { padding: 6px 12px; font-size: 7px; }
+    #storyStatus {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--red);
+      letter-spacing: 1px;
+    }
+
+    #battleCanvas {
+      width: 100%;
+      flex: 1;
+      display: block;
+    }
+
+    /* Battle Log */
+    .battle-log-wrap {
+      width: 100%;
+      background: rgba(0,0,0,0.8);
+      border-top: 1px solid var(--border);
+      padding: 4px 12px;
+      flex-shrink: 0;
+      height: 60px;
+      overflow: hidden;
+    }
+    #battleLog {
+      font-size: 9px;
+      color: var(--dim);
+      line-height: 1.6;
+    }
+
+    /* ── Free Battle Setup ── */
+    #freeBattleSetup {
+      gap: 16px;
+    }
+    #teamSelectArea {
+      display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    }
+    .mon-card.owned:hover {
+      border-color: var(--green);
+      box-shadow: 0 8px 24px rgba(0,255,136,0.2);
+    }
+
+    /* ── Story Result ── */
+    #storyResultScreen {
+      gap: 24px;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.6) 0%, var(--darker) 100%);
+    }
+    #storyResultText {
+      font-family: var(--font-pixel);
+      font-size: clamp(9px, 2vw, 13px);
+      text-align: center;
+      line-height: 2;
+    }
+    .win  { color: var(--green); text-shadow: 0 0 20px rgba(0,255,136,0.6); }
+    .lose { color: var(--red);   text-shadow: 0 0 20px rgba(232,0,26,0.6); }
+    .capture { color: var(--yellow); }
+    .miss { color: var(--dim); }
+
+    /* ── Diagonal Deco Lines ── */
+    .deco-line {
+      position: absolute;
+      background: var(--red);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--red); }
+
+    /* ── Small corner mark ── */
+    .corner-mark {
+      position: absolute;
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      color: var(--border);
+      letter-spacing: 1px;
+    }
+    .corner-mark.tl { top: 8px; left: 8px; }
+    .corner-mark.br { bottom: 8px; right: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ MAIN MENU ══════════ -->
+  <div class="screen active" id="menuScreen">
+    <div class="deco-line" style="width:200%;height:2px;top:35%;left:-50%;transform:rotate(-8deg)"></div>
+    <div class="deco-line" style="width:200%;height:1px;top:65%;left:-50%;transform:rotate(-8deg)"></div>
+
+    <div class="corner-mark tl">v0.1-BETA</div>
+    <div class="corner-mark br">GEN I</div>
+
+    <div class="game-title">POKÉBALL SIM</div>
+    <div class="game-subtitle">◆ BATTLE SIMULATOR ◆</div>
+
+    <div class="menu-buttons">
+      <button class="btn" id="storyBtn">▶ STORY MODE</button>
+      <button class="btn" id="freeBattleBtn">⚔ FREE BATTLE</button>
+    </div>
+
+    <div id="rosterDisplay"></div>
+  </div>
+
+  <!-- ══════════ STARTER PICK ══════════ -->
+  <div class="screen" id="storyPickScreen">
+    <div class="screen-title">CHOOSE YOUR PARTNER</div>
+    <div class="screen-sub">Select your starter — choose wisely</div>
+    <div id="starterPickArea"></div>
+    <div class="story-pick-actions">
+      <button class="btn" id="startStoryBtn">BEGIN STORY ▶</button>
+      <button class="btn secondary" id="backToMenuBtn">← BACK</button>
+    </div>
+  </div>
+
+  <!-- ══════════ BATTLE SCREEN ══════════ -->
+  <div class="screen" id="battleScreen">
+    <div class="battle-header">
+      <span id="storyStatus">FREE BATTLE</span>
+    </div>
+    <canvas id="battleCanvas"></canvas>
+    <div class="battle-log-wrap">
+      <div id="battleLog"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ FREE BATTLE SETUP ══════════ -->
+  <div class="screen" id="freeBattleSetup">
+    <div class="screen-title">FREE BATTLE</div>
+    <div class="screen-sub">Pick a Pokémon — locked ones need Story Mode to unlock</div>
+    <div id="teamSelectArea"></div>
+    <button class="btn secondary small" id="backToMenuBtn2" style="margin-top:16px">← BACK TO MENU</button>
+  </div>
+
+  <!-- ══════════ RESULT SCREEN ══════════ -->
+  <div class="screen" id="storyResultScreen">
+    <div id="storyResultText"></div>
+    <button class="btn" id="storyContinueBtn">CONTINUE</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

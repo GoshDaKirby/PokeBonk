@@ -1,0 +1,169 @@
+{
+  "pokemon": [
+    {
+      "id": "0001",
+      "name": "Bulbasaur",
+      "types": ["Grass", "Poison"],
+      "color": "#78C850",
+      "secondColor": "#A040A0",
+      "hp": 45,
+      "attack": 49,
+      "defense": 49,
+      "spAttack": 65,
+      "spDefense": 65,
+      "speed": 45,
+      "total": 318,
+      "sprite": "🌿",
+      "passiveAbility": {
+        "name": "Overgrow",
+        "description": "When HP drops below 33%, power increases by 50%",
+        "trigger": "lowHp",
+        "effect": "powerBoost",
+        "value": 1.5
+      },
+      "moves": [
+        {
+          "name": "Vine Whip",
+          "type": "Grass",
+          "category": "physical",
+          "power": 45,
+          "cooldown": 2000,
+          "range": 120,
+          "effect": null
+        },
+        {
+          "name": "Leech Seed",
+          "type": "Grass",
+          "category": "status",
+          "power": 0,
+          "cooldown": 8000,
+          "range": 100,
+          "effect": "leechSeed",
+          "duration": 5000
+        },
+        {
+          "name": "Razor Leaf",
+          "type": "Grass",
+          "category": "physical",
+          "power": 55,
+          "cooldown": 4000,
+          "range": 150,
+          "effect": "highCrit"
+        }
+      ]
+    },
+    {
+      "id": "0004",
+      "name": "Charmander",
+      "types": ["Fire"],
+      "color": "#F08030",
+      "secondColor": "#F8D030",
+      "hp": 39,
+      "attack": 52,
+      "defense": 43,
+      "spAttack": 60,
+      "spDefense": 50,
+      "speed": 65,
+      "total": 309,
+      "sprite": "🔥",
+      "passiveAbility": {
+        "name": "Blaze",
+        "description": "When HP drops below 33%, fire moves deal 50% more damage",
+        "trigger": "lowHp",
+        "effect": "fireBoost",
+        "value": 1.5
+      },
+      "moves": [
+        {
+          "name": "Scratch",
+          "type": "Normal",
+          "category": "physical",
+          "power": 40,
+          "cooldown": 1500,
+          "range": 60,
+          "effect": null
+        },
+        {
+          "name": "Ember",
+          "type": "Fire",
+          "category": "special",
+          "power": 40,
+          "cooldown": 3000,
+          "range": 130,
+          "effect": "burn",
+          "chance": 0.1
+        },
+        {
+          "name": "Flamethrower",
+          "type": "Fire",
+          "category": "special",
+          "power": 90,
+          "cooldown": 7000,
+          "range": 160,
+          "effect": "burn",
+          "chance": 0.1
+        }
+      ]
+    },
+    {
+      "id": "0007",
+      "name": "Squirtle",
+      "types": ["Water"],
+      "color": "#6890F0",
+      "secondColor": "#98D8D8",
+      "hp": 44,
+      "attack": 48,
+      "defense": 65,
+      "spAttack": 50,
+      "spDefense": 64,
+      "speed": 43,
+      "total": 314,
+      "sprite": "💧",
+      "passiveAbility": {
+        "name": "Torrent",
+        "description": "When HP drops below 33%, water moves deal 50% more damage",
+        "trigger": "lowHp",
+        "effect": "waterBoost",
+        "value": 1.5
+      },
+      "moves": [
+        {
+          "name": "Tackle",
+          "type": "Normal",
+          "category": "physical",
+          "power": 40,
+          "cooldown": 1800,
+          "range": 60,
+          "effect": null
+        },
+        {
+          "name": "Water Gun",
+          "type": "Water",
+          "category": "special",
+          "power": 40,
+          "cooldown": 2500,
+          "range": 130,
+          "effect": null
+        },
+        {
+          "name": "Withdraw",
+          "type": "Water",
+          "category": "status",
+          "power": 0,
+          "cooldown": 10000,
+          "range": 0,
+          "effect": "defenseBoost",
+          "value": 1.5,
+          "duration": 5000
+        }
+      ]
+    }
+  ],
+  "typeChart": {
+    "Fire": { "weakTo": ["Water", "Rock", "Ground"], "resistantTo": ["Fire", "Grass", "Ice", "Bug", "Steel", "Fairy"], "immuneTo": [] },
+    "Water": { "weakTo": ["Grass", "Electric"], "resistantTo": ["Fire", "Water", "Ice", "Steel"], "immuneTo": [] },
+    "Grass": { "weakTo": ["Fire", "Ice", "Poison", "Flying", "Bug"], "resistantTo": ["Water", "Grass", "Electric", "Ground"], "immuneTo": [] },
+    "Poison": { "weakTo": ["Ground", "Psychic"], "resistantTo": ["Grass", "Fighting", "Poison", "Bug", "Fairy"], "immuneTo": [] },
+    "Normal": { "weakTo": ["Fighting"], "resistantTo": [], "immuneTo": ["Ghost"] }
+  }
+}
